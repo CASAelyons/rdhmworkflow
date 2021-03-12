@@ -26,8 +26,8 @@ class rdhmWorkflow(object):
 
         sc = SiteCatalog()
         
-        shared_scratch = Directory(Directory.SHARED_SCRATCH, path="/nfs/shared/rdhm/scratch")\
-                .add_file_servers(FileServer("file:///nfs/shared/rdhm/scratch", Operation.ALL))
+        shared_scratch = Directory(Directory.SHARED_SCRATCH, path="/nfs/shared/pegasus/scratch")\
+                .add_file_servers(FileServer("file:///nfs/shared/pegasus/scratch", Operation.ALL))
 
         #container_location = Directory(Directory.SHARED_STORAGE, path="/nfs/shared/ldm")\
         #        .add_file_servers(FileServer("file:///nfs/shared/ldm", Operation.ALL))
