@@ -21,7 +21,8 @@ output-path		   = /nfs/shared/rdhm/output
 input-path                 = /opt/rdhm/RDHM_apriori_par_larger_domain/input_data_new_sac    #static DFW input params on container
 #input-path                  = /opt/rdhm/output            # State variables written in the previous runs
 input-path 		   = /nfs/shared/rdhm/output 	   # reads previous output as input 
-freq-path		   = /opt/rdhm/AnnPeaks
+#freq-path		   = /opt/rdhm/AnnPeaks
+freq-path		   = /nfs/shared/rdhm/AnnPeaks
 #input-path                 = /opt/rdhm/input/
 input-path 		   = /nfs/shared/qpe		#qpe forcing data
 
