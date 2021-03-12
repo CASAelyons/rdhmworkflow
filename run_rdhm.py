@@ -90,7 +90,7 @@ class rdhmWorkflow(object):
         props.write()
         
         rdhm_job = Job(rdhm_transformation)\
-            .add_args("-s", starttime, "-f", endtime, inputfile)\
+            .add_args("-s", self.starttime, "-f", self.endtime, inputfile)\
             .add_inputs(inputfile)
 
         wf.add_jobs(rdhm_job)
@@ -121,7 +121,8 @@ if __name__ == '__main__':
     parser.add_argument("-f", "--endtime", metavar="END_TIME", type=str, help="End time in ISO format-> YYYYMMDDTHHMM (use UTC)", required=True)
     args = parser.parse_args()
     inputfile = args.inputfile
-
+    starttime = args.starttime
+    endtime = args.endtime
     workflow = rdhmWorkflow(inputfile, starttime, endtime)
     workflow.generate_workflow()
 
