@@ -14,9 +14,11 @@ from argparse import ArgumentParser
 
 
 class rtmaWorkflow(object):
-    def __init__(self, inputfile):
+    def __init__(self, inputfile, starttime, endtime):
+        #times given in ISO format like so: 20180908T1815 (no seconds)
         self.inputfile = inputfile
-
+        self.starttime = starttime
+        self.endtime = endtime
     def generate_jobs(self):
         
         ts = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
@@ -88,7 +90,7 @@ class rtmaWorkflow(object):
         props.write()
         
         rdhm_job = Job(rdhm_transformation)\
-            .add_args(inputfile)\
+            .add_args("-s", starttime, "-f", endtime, inputfile)\
             .add_inputs(inputfile)
 
         wf.add_jobs(rdhm_job)
@@ -115,10 +117,11 @@ if __name__ == '__main__':
 
     parser = ArgumentParser(description="RDHM Workflow")
     parser.add_argument("-i", "--inputfile", metavar="INPUT_FILE", type=str, help="Path to input card (configfile)", required=True)
-
+    parser.add_argument("-s", "--starttime", metavar="START_TIME", type=str, help="Start time in ISO format-> YYYYMMDDTHHMM (use UTC)", required=True)
+    parser.add_argument("-f", "--endtime", metavar="END_TIME", type=str, help="End time in ISO format-> YYYYMMDDTHHMM (use UTC)", required=True)
     args = parser.parse_args()
     inputfile = args.inputfile
 
-    workflow = rdhmWorkflow(inputfile)
+    workflow = rdhmWorkflow(inputfile, starttime, endtime)
     workflow.generate_workflow()
 
