@@ -101,9 +101,9 @@ class rdhmWorkflow(object):
         
         try:
             wf.plan(submit=True)
-            wf.wait()
-            wf.analyze()
-            wf.statistics()
+            #wf.wait()
+            #wf.analyze()
+            #wf.statistics()
         except PegasusClientError as e:
             print(e.output)
         
