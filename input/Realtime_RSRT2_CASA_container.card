@@ -1,0 +1,64 @@
+#his deck is used to simulate DFW basins using cell-to-cell routing
+# This is a test for real time mode of HL-RDHM (test basin = Fish Creek at Carrier : GP6133)
+# Operation = sac rutpix9 
+# Simulation time period: Start_time , Switch_time and End_time. 
+#add time-period on the command line instead
+time-period                = 20180908T1800 20180908T1805
+ignore-1d-xmrg             = true
+#simulation time step in the format of HH:MM:SS.XXXX (Our simulation is every minute, the same as CASA temporal resolution.)
+# When it wants to pick the data, it just drops the seconds form time, for example if the UTA time is 01:24:06, it will pick the file 01:24
+
+#can add this on the commandline too
+time-step                  = 00:01:00
+
+#the connectivity file (This is connectivity file for 1/8 hrap, for other rsolution we also have the connectivity files available)
+connectivity               = /opt/rdhm/RDHM_apriori_par_larger_domain/connectivity/conectivity_card_DFW_Dallas_CASA.con
+
+# Spatial resolution = 50 meter the same as CASA nominal spatial resolution
+pixel-size-hrap            = 0.1250
+#output-path		   = /opt/rdhm/output
+output-path		   = /nfs/shared/rdhm/output
+input-path                 = /opt/rdhm/RDHM_apriori_par_larger_domain/input_data_new_sac    #static DFW input params on container
+#input-path                  = /opt/rdhm/output            # State variables written in the previous runs
+input-path 		   = /nfs/shared/rdhm/output 	   # reads previous output as input 
+freq-path		   = /opt/rdhm/AnnPeaks
+#input-path                 = /opt/rdhm/input/
+input-path 		   = /nfs/shared/qpe		#qpe forcing data
+
+obvgrids                   = xmrg filename=xmrgyyyyMMddhhmmz freq=0:01:00
+obvgrids                   = start=0:00:00 resolution=0.125 nodata=-1
+obvgrids                   = relativecoord=false
+# Study domain
+#window-in-hrap = 575.000 594.875 243.000 260.875
+#select operations
+operations                 = sac rutpix9 FreqParams
+#data to be output before, inside and after timeloop in griiid format
+output-grid-inside-timeloop=  uztwc uzfwc lztwc
+output-grid-inside-timeloop=  lzfsc lzfpc adimpc
+output-grid-inside-timeloop=  areac1 areac2 areac3 areac4 depth
+output-grid-inside-timeloop=  surfaceFlow discharge 
+#output-timeseries-basin-outlet= discharge
+#output-timeseries-basin-average    =  xmrg
+#output-grid-last-step              = discharge surfaceFlow
+#output-grid-before-timeloop        = sac_PCTIM
+#output-grid-last-step              = sac_PCTIM
+#output-grid-before-timeloop=  logmean logstd wlogskew error_code
+output-grid-inside-timeloop=  returnp #probam
+######################################################################
+user-data                 = startyear 1996
+user-data                 = endyear 2014
+#In number of timestep, example, 2 means output every 2 timestep
+output-grid-step           = 1
+#-----------------------
+#----- basin info ------
+#-----------------------
+input-data                 = RSRT2
+input-data                 = sac_ADIMP=0.0
+input-data                 = sac_RIVA=0.0
+input-data                 = sac_EFC=0.5
+input-data                 = sac_SIDE=0.0
+input-data                 = sac_RSERV=0.3
+#SAC states
+#input-data                 = uztwc=0.587   uzfwc=0         lztwc=0.2614
+#input-data                 = lzfsc=0.5     lzfpc=0.1542    adimpc=0.425
+#input-data                 = areac=0.5     depth=0.1542
