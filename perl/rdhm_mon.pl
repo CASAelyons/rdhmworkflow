@@ -47,7 +47,9 @@ sub file_monitor {
 	    my $endymd = substr($qpefiles[-1], -13, 8);
 	    my $endhm = substr($qpefiles[-1], -5, 4);
 	    my $endtime =$endymd . "T". $endhm;
-	    print "starttime: " . $starttime . " endtime: " . $endtime . "\n";
+	    my $wfcall = "python3.6 /home/ldm/rdhmworkflow/run_rdhm.py -s " . $starttime . " -f " . $endtime . " Realtime_RSRT2_CASA_container.card";
+	    print $wfcall . "\n";
+	    system($wfcall);
             @qpefiles = ();
 	}
 	sleep 10;
