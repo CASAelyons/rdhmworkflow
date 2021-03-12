@@ -24,7 +24,7 @@ input-path 		   = /nfs/shared/rdhm/output 	   # reads previous output as input
 #freq-path		   = /opt/rdhm/AnnPeaks
 freq-path		   = /nfs/shared/rdhm/AnnPeaks
 #input-path                 = /opt/rdhm/input/
-input-path 		   = /nfs/shared/qpe		#qpe forcing data
+input-path 		   = /nfs/shared/rdhm/qpe		#qpe forcing data
 
 obvgrids                   = xmrg filename=xmrgyyyyMMddhhmmz freq=0:01:00
 obvgrids                   = start=0:00:00 resolution=0.125 nodata=-1
