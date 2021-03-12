@@ -47,7 +47,7 @@ sub file_monitor {
 	    my $endymd = substr($qpefiles[-1], -13, 8);
 	    my $endhm = substr($qpefiles[-1], -5, 4);
 	    my $endtime =$endymd . "T". $endhm;
-	    my $wfcall = "python3.6 /home/ldm/rdhmworkflow/run_rdhm.py -s " . $starttime . " -f " . $endtime . " Realtime_RSRT2_CASA_container.card";
+	    my $wfcall = "python3.6 /home/ldm/rdhmworkflow/run_rdhm.py -s " . $starttime . " -f " . $endtime . " -i Realtime_RSRT2_CASA_container.card";
 	    print $wfcall . "\n";
 	    system($wfcall);
             @qpefiles = ();
@@ -67,12 +67,20 @@ sub file_monitor {
 	    my $pathstr;
             my $filename;
             ($pathstr, $filename) = $file =~ m|^(.*[/\\])([^/\\]+?)$|;
-		
-	    my $pathsuffix = substr($pathstr, -4);
+	    my @pathstr_arr = split('/', $pathstr);
+	    my $pathsuffix = $pathstr_arr[-1];
+	    print $pathsuffix . "\n";
 	    print $pathstr . " " . $filename . "\n";
-	    if ($pathsuffix eq "qpe/") {
+	    my $filesuffix = substr($filename, -3);	    
+	    
+	    if ($pathsuffix eq "qpe") {
 		$qpefiles_contained = 1;
 		push(@qpefiles, $file);
+	    }
+	    if ($filesuffix eq ".gz") {
+		my $link_call = "ln -f -s " . $file . " " . $pathstr . "current_" . $pathsuffix . ".gz";
+		print "link call: " . $link_call . "\n";
+		system($link_call);
 	    }
 	}
 	
@@ -99,12 +107,12 @@ sub daemonize {
 
 sub command_line_parse {
     if ($#ARGV < 0) { 
-	print "Usage:  xml_ingest.pl xml_dir\n";
+	print "Usage:  rdhm_mon.pl <shared_dir>\n";
    	exit; 
     }
     $input_data_dir = $ARGV[0];
     my @rdd = split(/ /, $input_data_dir);
     foreach $w (@rdd) {
-	print "Will recursively monitor $w for incoming xml files\n";
+	print "Will recursively monitor $w for incoming files\n";
     }
 }
