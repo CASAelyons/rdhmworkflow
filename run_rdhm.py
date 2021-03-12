@@ -114,7 +114,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
     parser = ArgumentParser(description="RDHM Workflow")
-    parser.add_argument("-i", "--inputfile", metavar="INPUT_FILE", type=str, help="Path to input netcdf file", required=True)
+    parser.add_argument("-i", "--inputfile", metavar="INPUT_FILE", type=str, help="Path to input card (configfile)", required=True)
 
     args = parser.parse_args()
     inputfile = args.inputfile
