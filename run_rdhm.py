@@ -13,7 +13,7 @@ from datetime import datetime
 from argparse import ArgumentParser
 
 
-class rtmaWorkflow(object):
+class rdhmWorkflow(object):
     def __init__(self, inputfile, starttime, endtime):
         #times given in ISO format like so: 20180908T1815 (no seconds)
         self.inputfile = inputfile
