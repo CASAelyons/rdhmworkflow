@@ -102,21 +102,17 @@ sub file_monitor {
 		my $short_filename = substr($filename, 0, -4);
 		my $unzipped_del_file = "/nfs/shared/rdhm/unzip/" . $short_filename;
 		unlink($unzipped_del_file);
-		my $conv_code;
 		my @typesplit = split /(\d+)/, $filename;
-		print "filetype: " . $typesplit[0] . "\n";
-		if ($typesplit[0] eq "discharge") {
-		    $conv_code = "/home/ldm/rdhmworkflow/geojson_conversions/discharge_to_geojson.py";
-		    my $geojson_conv_cmd = "python3.6 " . $conv_code . " -i " . $file . " -o /nfs/shared/rdhm/geojson/" . $short_filename . ".geojson -x /home/ldm/rdhmworkflow/geojson_conversions/nx.txt -y /home/ldm/rdhmworkflow/geojson_conversions/ny.txt";
-		    system($geojson_conv_cmd);
-		}
-		else {
-		    unlink($file);
-		}
+		my $conv_code = "/home/ldm/rdhmworkflow/geojson_conversions/" . $typesplit[0] . "_to_geojson.py";
+		my $geojson_conv_cmd = "python3.6 " . $conv_code . " -i " . $file . " -o /nfs/shared/rdhm/geojson/" . $short_filename . ".geojson -x /home/ldm/rdhmworkflow/geojson_conversions/nx.txt -y /home/ldm/rdhmworkflow/geojson_conversions/ny.txt";
+		system($geojson_conv_cmd);
 	    }
 	    elsif ($pathsuffix eq "geojson") {
 		my $pqins_call = "/home/ldm/bin/pqinsert -f EXP -p " . $filename . " " . $file;
 		system($pqins_call);
+		my $short_filename = substr($filename, 0, -8);
+		my $asc_del_file = "/nfs/shared/rdhm/asc/" . $short_filename;
+		unlink($asc_del_file);
 		unlink($file);
 	    }
 	    elsif ($pathsuffix eq "output") {
