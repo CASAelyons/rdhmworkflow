@@ -77,10 +77,20 @@ sub file_monitor {
 		$qpefiles_contained = 1;
 		push(@qpefiles, $file);
 	    }
-	    if ($filesuffix eq ".gz") {
+	    elsif ($filesuffix eq ".gz") {
 		my $link_call = "ln -f -s " . $file . " " . $pathstr . "current_" . $pathsuffix . ".gz";
-		print "link call: " . $link_call . "\n";
+		#print "link call: " . $link_call . "\n";
 		system($link_call);
+                #my @filesplit = split('.', $filename);
+		if (($pathsuffix eq "surfaceFlow") || ($pathsuffix eq "discharge") || ($pathsuffix eq "returnp")) {
+		    my $unzip_fn = substr($filename, 0, -3);
+		    my $gunzip_call = "gunzip -c " . $file . " > /nfs/shared/rdhm/geojson/" . $unzip_fn;
+		    #print "gunzip call: " . $gunzip_call . "\n";
+		    system($gunzip_call);
+		}
+	    }
+	    elsif ($pathsuffix eq "geojson") {
+		#my $xmrgToAsc_call = "xmrgToAsc";
 	    }
 	}
 	
