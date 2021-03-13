@@ -119,7 +119,7 @@ sub file_monitor {
 		#possible race condition here... 
 		#going to try using basin_info files as indication that rdhm pegasus run has completed
 		#then delete the qpe xmrg files that went into the rdhm run
-		my $ftype = substr($filename 0, 6);
+		my $ftype = substr($filename, 0, 6);
 		if ($ftype eq "basin_") {
 		    for $delfile (@delete_queue) {
 			unlink($delfile);
