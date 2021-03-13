@@ -21,7 +21,7 @@ our @qpefiles;
 our @delete_queue;
 
 &command_line_parse;
-#&daemonize;
+&daemonize;
 
 my $file_mon = new threads \&file_monitor;
 
@@ -49,7 +49,7 @@ sub file_monitor {
 	    my $endhm = substr($qpefiles[-1], -5, 4);
 	    my $endtime =$endymd . "T". $endhm;
 	    my $wfcall = "python3.6 /home/ldm/rdhmworkflow/run_rdhm.py -s " . $starttime . " -f " . $endtime . " -i Realtime_RSRT2_CASA_container.card";
-	    print $wfcall . "\n";
+	    #print $wfcall . "\n";
 	    system($wfcall);
 	    for $qpefile (@qpefiles) {
 		push(@delete_queue, $qpefile);
@@ -73,8 +73,8 @@ sub file_monitor {
             ($pathstr, $filename) = $file =~ m|^(.*[/\\])([^/\\]+?)$|;
 	    my @pathstr_arr = split('/', $pathstr);
 	    my $pathsuffix = $pathstr_arr[-1];
-	    print $pathsuffix . "\n";
-	    print $pathstr . " " . $filename . "\n";
+	    #print $pathsuffix . "\n";
+	    #print $pathstr . " " . $filename . "\n";
 	    my $filesuffix = substr($filename, -3);	    
 	    
 	    if ($pathsuffix eq "qpe") {
@@ -95,7 +95,7 @@ sub file_monitor {
 	    }
 	    elsif ($pathsuffix eq "unzip") {
 		my $xmrgToAsc_call = "singularity exec -B /nfs/shared:/nfs/shared /nfs/shared/ldm/rdhm_singularity.simg /opt/rdhm/bin/xmrgtoasc -i " . $file . " -o /nfs/shared/rdhm/asc/" . $filename . ".asc -f \"-5.3f\"";
-		print $xmrgToAsc_call . "\n";
+		#print $xmrgToAsc_call . "\n";
 		system($xmrgToAsc_call);
 	    }
 	    elsif ($pathsuffix eq "asc") {
