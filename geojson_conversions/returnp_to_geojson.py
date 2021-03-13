@@ -109,7 +109,7 @@ class returnp_to_geojson(object):
                         elif (returnp[ii,jj]>500):
                             polcolor = '#fcfec0'
                             
-                        feature = gj.Feature(geometry=pol, properties={"color": polcolor, "dataType": "hydrology", "productType": "return period", "value": returnp[ii,jj], "units": "years", "filename": self.outputfile})
+                        feature = gj.Feature(geometry=pol, properties={"color": polcolor, "dataType": "hydrology", "productType": "return period", "value": returnp[ii,jj], "units": "years"})
                         polygon_feats.append(feature)
 
         
