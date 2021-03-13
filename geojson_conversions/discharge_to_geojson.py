@@ -100,6 +100,7 @@ class discharge_to_geojson(object):
         features = []
         features.extend(polygon_feats)
         featCollection = gj.FeatureCollection(features)
+        featCollection['id'] = self.outputfile
         dumpFC = gj.dumps(featCollection, sort_keys=True)
         try:
             of = open(self.outputfile, 'w')
