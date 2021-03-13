@@ -90,7 +90,15 @@ sub file_monitor {
 		}
 	    }
 	    elsif ($pathsuffix eq "geojson") {
-		#my $xmrgToAsc_call = "xmrgToAsc";
+		my $xmrgToAsc_call = "singularity exec -B /nfs/shared:/nfs/shared /nfs/shared/ldm/rdhm_singularity.simg /opt/rdhm/bin/xmrgtoasc -i " . $file . " -o /nfs/shared/rdhm/asc/" . $filename . ".asc -f \"-5.3f\"";
+		print $xmrgToAsc_call . "\n";
+		system($xmrgToAsc_call);
+	    }
+	    elsif ($pathsuffix eq "asc") {
+		my $unzipped_del_filename = substr($filename, 0, -4);
+		print "deleting " . $unzipped_del_file . "\n";
+		my $unzipped_del_file = "/nfs/shared/rdhm/geojson/" . $unzipped_del_filename;
+		unlink($unzipped_del_file);
 	    }
 	}
 	
