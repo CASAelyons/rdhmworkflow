@@ -57,7 +57,7 @@ class returnp_to_geojson(object):
         for ii in range(nrows-1,-1,-1):
             for jj in range(ncols): 
                 if (jj<235 and ii>0):
-                    if (returnp[ii,jj]>1):
+                    if (returnp[ii,jj]>2):
                         pol = gj.Polygon([[(-1.*ny[ii,jj],nx[ii,jj]),(-1.*ny[ii,jj+1],nx[ii,jj+1]),(-1.*ny[ii-1,jj+1],nx[ii-1,jj+1]),(-1.*ny[ii-1,jj],nx[ii-1,jj]),(-1.*ny[ii,jj], nx[ii,jj])]])
                         
                         if (returnp[ii,jj]>1 and returnp[ii,jj]<=2):
@@ -109,7 +109,7 @@ class returnp_to_geojson(object):
                         elif (returnp[ii,jj]>500):
                             polcolor = '#fcfec0'
                             
-                        feature = gj.Feature(geometry=pol, properties={"color": polcolor, "dataType": "hydrology", "productType": "return period", "value": returnp[ii,jj], "units": "years"})
+                        feature = gj.Feature(geometry=pol, properties={"color": polcolor, "dataType": "hydrology", "productType": "return period", "value": returnp[ii,jj], "units": "years", "filename": self.outputfile})
                         polygon_feats.append(feature)
 
         

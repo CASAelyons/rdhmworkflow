@@ -91,7 +91,7 @@ class surfaceFlow_to_geojson(object):
                         elif (surfaceFlow[ii,jj]>7):
                             polcolor = 'white'
                             
-                        feature = gj.Feature(geometry=pol, properties={"color": polcolor, "dataType": "hydrology", "productType": "runoff rate", "value": surfaceFlow[ii,jj], "units": "inph"})
+                        feature = gj.Feature(geometry=pol, properties={"color": polcolor, "dataType": "hydrology", "productType": "runoff rate", "value": surfaceFlow[ii,jj], "units": "inph", "filename": self.outputfile})
                         polygon_feats.append(feature)
 
         
