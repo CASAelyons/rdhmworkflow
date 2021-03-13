@@ -18,6 +18,7 @@ use threads::shared;
 
 our $input_data_dir;
 our @qpefiles;
+our @delete_queue;
 
 &command_line_parse;
 #&daemonize;
@@ -50,7 +51,10 @@ sub file_monitor {
 	    my $wfcall = "python3.6 /home/ldm/rdhmworkflow/run_rdhm.py -s " . $starttime . " -f " . $endtime . " -i Realtime_RSRT2_CASA_container.card";
 	    print $wfcall . "\n";
 	    system($wfcall);
-            @qpefiles = ();
+	    for $qpefile (@qpefiles) {
+		push(@delete_queue, $qpefile);
+	    }
+	    @qpefiles = ();
 	}
 	sleep 10;
     }
@@ -84,31 +88,51 @@ sub file_monitor {
                 #my @filesplit = split('.', $filename);
 		if (($pathsuffix eq "surfaceFlow") || ($pathsuffix eq "discharge") || ($pathsuffix eq "returnp")) {
 		    my $unzip_fn = substr($filename, 0, -3);
-		    my $gunzip_call = "gunzip -c " . $file . " > /nfs/shared/rdhm/geojson/" . $unzip_fn;
+		    my $gunzip_call = "gunzip -c " . $file . " > /nfs/shared/rdhm/unzip/" . $unzip_fn;
 		    #print "gunzip call: " . $gunzip_call . "\n";
 		    system($gunzip_call);
 		}
 	    }
-	    elsif ($pathsuffix eq "geojson") {
+	    elsif ($pathsuffix eq "unzip") {
 		my $xmrgToAsc_call = "singularity exec -B /nfs/shared:/nfs/shared /nfs/shared/ldm/rdhm_singularity.simg /opt/rdhm/bin/xmrgtoasc -i " . $file . " -o /nfs/shared/rdhm/asc/" . $filename . ".asc -f \"-5.3f\"";
 		print $xmrgToAsc_call . "\n";
 		system($xmrgToAsc_call);
 	    }
 	    elsif ($pathsuffix eq "asc") {
-		my $unzipped_del_filename = substr($filename, 0, -4);
-		print "deleting " . $unzipped_del_file . "\n";
-		my $unzipped_del_file = "/nfs/shared/rdhm/geojson/" . $unzipped_del_filename;
+		my $short_filename = substr($filename, 0, -4);
+		my $unzipped_del_file = "/nfs/shared/rdhm/unzip/" . $short_filename;
 		unlink($unzipped_del_file);
+		my $conv_code;
+		my @typesplit = split /(\d+)/, $filename;
+		print "filetype: " . $typesplit[0] . "\n";
+		if ($typesplit[0] eq "discharge") {
+		    $conv_code = "/home/ldm/rdhmworkflow/geojson_conversions/discharge_to_geojson.py";
+		    my $geojson_conv_cmd = "python3.6 " . $conv_code . " -i " . $file . " -o /nfs/shared/rdhm/geojson/" . $short_filename . ".geojson -x /home/ldm/rdhmworkflow/geojson_conversions/nx.txt -y /home/ldm/rdhmworkflow/geojson_conversions/ny.txt";
+		    system($geojson_conv_cmd);
+		}
+		else {
+		    unlink($file);
+		}
+	    }
+	    elsif ($pathsuffix eq "geojson") {
+		my $pqins_call = "/home/ldm/bin/pqinsert -f EXP -p " . $filename . " " . $file;
+		system($pqins_call);
+		unlink($file);
+	    }
+	    elsif ($pathsuffix eq "output") {
+		#possible race condition here... 
+		#going to try using basin_info files as indication that rdhm pegasus run has completed
+		#then delete the qpe xmrg files that went into the rdhm run
+		my $ftype = substr($filename 0, 6);
+		if ($ftype eq "basin_") {
+		    for $delfile (@delete_queue) {
+			unlink($delfile);
+		    }
+		    @delete_queue = ();
+		}
+		unlink($file);
 	    }
 	}
-	
-	    #if ($suffix eq "xml") 
-	    #{
-#		my $pqins_call = "/home/ldm/bin/pqinsert -f EXP -p " . $filename . " " . $file;
-#		system($pqins_call);
-#		unlink($file);
-#	    }
-	
     }
 }
 
