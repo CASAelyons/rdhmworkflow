@@ -93,7 +93,7 @@ class discharge_to_geojson(object):
                         elif (discharge[ii,jj]>3.556):
                             polcolor = 'white'
                             
-                        feature = gj.Feature(geometry=pol, properties={"color": polcolor, "dataType": "hydrology", "streamflow": A[ii,jj]})
+                        feature = gj.Feature(geometry=pol, properties={"color": polcolor, "dataType": "hydrology", "productType": "streamflow", "value": A[ii,jj]}, "units": "CFS")
                         polygon_feats.append(feature)
 
         
