@@ -48,6 +48,10 @@ sub file_monitor {
 	    my $endymd = substr($qpefiles[-1], -13, 8);
 	    my $endhm = substr($qpefiles[-1], -5, 4);
 	    my $endtime =$endymd . "T". $endhm;
+	    #good time to send along latest data for backing up current state
+	    system("sh /home/ldm/rdhmworkflow/send_latest_output.sh");
+
+	    #call the pegasus workflow
 	    my $wfcall = "python3.6 /home/ldm/rdhmworkflow/run_rdhm.py -s " . $starttime . " -f " . $endtime . " -i Realtime_RSRT2_CASA_container.card";
 	    #print $wfcall . "\n";
 	    system($wfcall);
