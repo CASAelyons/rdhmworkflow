@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 
 ##################################################################################################
-#####WRITTEN BY ERIC LYONS 12/2012 for CASA, UNIVERSITY OF MASSACHUSETTS##########################
+#####WRITTEN BY ERIC LYONS 03/2021 for CASA, UNIVERSITY OF MASSACHUSETTS##########################
 ##################################################################################################
 #  TESTED FUNCTIONALITY:                                                                         #
-#  
-#  -RECURSIVELY MONITORS DIRECTORIES FOR INCOMING FILES AND PQINSERTS                            #
-#  #                                                                                                #
+#                                                                                                #  
+#  -RECURSIVELY MONITORS DIRECTORIES FOR INCOMING FILES AND EXECUTES DATA DRIVEN WORKFLOW        #
+#                                                                                                #
 ##################################################################################################
 
 use POSIX qw(setsid);
@@ -14,7 +14,6 @@ use File::Copy;
 use File::Monitor;
 use threads;
 use threads::shared;
-#use lib "/home/ldm/perl";
 
 our $input_data_dir;
 our @qpefiles;
@@ -28,7 +27,6 @@ my $file_mon = new threads \&file_monitor;
 sleep 900000000;
 
 sub file_monitor {
-    
     my $dir_monitor = File::Monitor->new();
         
     $dir_monitor->watch( {
@@ -38,10 +36,12 @@ sub file_monitor {
     } );
     
     $dir_monitor->scan;
+
     for ($i=0; $i < 9000000000; $i++) {
 	our $qpefiles_contained = 0;
 	my @changes = $dir_monitor->scan;   
 	if (($qpefiles_contained == 0) && (@qpefiles)) {
+	    
 	    my $startymd = substr($qpefiles[0], -13, 8);
 	    my $starthm = substr($qpefiles[0], -5, 4);
 	    my $starttime = $startymd . "T" . $starthm;
@@ -51,6 +51,7 @@ sub file_monitor {
 	    my $wfcall = "python3.6 /home/ldm/rdhmworkflow/run_rdhm.py -s " . $starttime . " -f " . $endtime . " -i Realtime_RSRT2_CASA_container.card";
 	    #print $wfcall . "\n";
 	    system($wfcall);
+
 	    for $qpefile (@qpefiles) {
 		push(@delete_queue, $qpefile);
 	    }
@@ -59,10 +60,9 @@ sub file_monitor {
 	sleep 10;
     }
     
-    sub new_files 
-    {
+    sub new_files  {
 	my ($name, $event, $change) = @_;
-
+	
 	@new_data_files = $change->files_created;
 	my @dels = $change->files_deleted;
 	print "Added: ".join("\nAdded: ", @new_data_files)."\n" if @new_data_files;
@@ -85,7 +85,6 @@ sub file_monitor {
 		my $link_call = "ln -f -s " . $file . " " . $pathstr . "current_" . $pathsuffix . ".gz";
 		#print "link call: " . $link_call . "\n";
 		system($link_call);
-                #my @filesplit = split('.', $filename);
 		if (($pathsuffix eq "surfaceFlow") || ($pathsuffix eq "discharge") || ($pathsuffix eq "returnp")) {
 		    my $unzip_fn = substr($filename, 0, -3);
 		    my $gunzip_call = "gunzip -c " . $file . " > /nfs/shared/rdhm/unzip/" . $unzip_fn;
@@ -113,7 +112,6 @@ sub file_monitor {
 		my $short_filename = substr($filename, 0, -8);
 		my $asc_del_file = "/nfs/shared/rdhm/asc/" . $short_filename;
 		unlink($asc_del_file);
-		unlink($file);
 	    }
 	    elsif ($pathsuffix eq "output") {
 		#possible race condition here... 
