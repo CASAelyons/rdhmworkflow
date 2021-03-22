@@ -18,16 +18,16 @@ connectivity               = /opt/rdhm/RDHM_apriori_par_larger_domain/connectivi
 pixel-size-hrap            = 0.1250
 #output-path		   = /opt/rdhm/output
 output-path		   = /nfs/shared/rdhm/output
-input-path                 = /opt/rdhm/RDHM_apriori_par_larger_domain/input_data_new_sac    #static DFW input params on container
+input-path		   = /opt/rdhm/RDHM_apriori_par_larger_domain/input_data_new_sac    #static DFW input params on container
+input-path		   = /nfs/shared/rdhm/output 	   # reads previous output as input 
+input-path		   = /nfs/shared/rdhm/qpe
 #input-path                  = /opt/rdhm/output            # State variables written in the previous runs
-input-path 		   = /nfs/shared/rdhm/output 	   # reads previous output as input 
 #freq-path		   = /opt/rdhm/AnnPeaks
 freq-path		   = /nfs/shared/rdhm/AnnPeaks
-#input-path                 = /opt/rdhm/input/
-input-path 		   = /nfs/shared/rdhm/qpe		#qpe forcing data
+#input-path                = /opt/rdhm/input/
 
-obvgrids                   = xmrg filename=xmrgyyyyMMddhhmmz freq=0:01:00
-obvgrids                   = start=0:00:00 resolution=0.125 nodata=-1
+obvgrids		   = xmrg filename=xmrgyyyyMMddhhmmz freq=0:01:00
+obvgrids		   = start=0:00:00 resolution=0.125 nodata=-1
 obvgrids                   = relativecoord=false
 # Study domain
 #window-in-hrap = 575.000 594.875 243.000 260.875
