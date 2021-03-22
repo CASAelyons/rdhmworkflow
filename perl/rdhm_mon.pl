@@ -53,7 +53,7 @@ sub file_monitor {
 
 	    #call the pegasus workflow
 	    my $wfcall = "python3.6 /home/ldm/rdhmworkflow/run_rdhm.py -s " . $starttime . " -f " . $endtime . " -i Realtime_RSRT2_CASA_container.card";
-	    #print $wfcall . "\n";
+	    print $wfcall . "\n";
 	    system($wfcall);
 
 	    for $qpefile (@qpefiles) {
@@ -108,6 +108,7 @@ sub file_monitor {
 		my @typesplit = split /(\d+)/, $filename;
 		my $conv_code = "/home/ldm/rdhmworkflow/geojson_conversions/" . $typesplit[0] . "_to_geojson.py";
 		my $geojson_conv_cmd = "python3.6 " . $conv_code . " -i " . $file . " -o /nfs/shared/rdhm/geojson/" . $short_filename . ".geojson -x /home/ldm/rdhmworkflow/geojson_conversions/nx.txt -y /home/ldm/rdhmworkflow/geojson_conversions/ny.txt";
+		print $geojson_conv_cmd . "\n";
 		system($geojson_conv_cmd);
 	    }
 	    elsif ($pathsuffix eq "geojson") {
@@ -124,11 +125,11 @@ sub file_monitor {
 		my $ftype = substr($filename, 0, 6);
 		if ($ftype eq "basin_") {
 		    for $delfile (@delete_queue) {
-			unlink($delfile);
+			#unlink($delfile);
 		    }
 		    @delete_queue = ();
 		}
-		unlink($file);
+		#unlink($file);
 	    }
 	}
     }
