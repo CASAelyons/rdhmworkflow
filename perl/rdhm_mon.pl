@@ -17,10 +17,12 @@ use threads::shared;
 
 our $input_data_dir;
 our @qpefiles;
+our @runfiles;
+our $leftover_file = "";
 our @delete_queue;
 
 &command_line_parse;
-&daemonize;
+#&daemonize;
 
 my $file_mon = new threads \&file_monitor;
 
@@ -41,13 +43,32 @@ sub file_monitor {
 	our $qpefiles_contained = 0;
 	my @changes = $dir_monitor->scan;   
 	if (($qpefiles_contained == 0) && (@qpefiles)) {
-	    
-	    my $startymd = substr($qpefiles[0], -13, 8);
-	    my $starthm = substr($qpefiles[0], -5, 4);
-	    my $starttime = $startymd . "T" . $starthm;
-	    my $endymd = substr($qpefiles[-1], -13, 8);
-	    my $endhm = substr($qpefiles[-1], -5, 4);
+	    #just the initial case
+	    if ($leftover_file eq "") {
+		$leftover_file = $qpefiles[0];
+	    }
+
+	    #use the last file of the previous batch as the start time
+	    my $startymd = substr($leftover_file, -13, 8);
+            my $starthm = substr($leftover_file, -5, 4);
+            my $starttime = $startymd . "T" . $starthm;
+
+	    #make sure we have at least two elements
+	    my $numQPEfiles = @qpefiles;
+	    if ($numQPEfiles < 2) {
+		#if not, use the leftover as endtime too
+		my $endymd = $startymd;
+		my $endhm = $starthm;
+	    }
+	    else {
+		my $endymd = substr($qpefiles[-2], -13, 8);
+		my $endhm = substr($qpefiles[-2], -5, 4);
+	    }
 	    my $endtime =$endymd . "T". $endhm;
+	    
+	    #reset the leftover file
+	    $leftover_file = $qpefiles[-1];
+
 	    #good time to send along latest data for backing up current state
 	    system("sh /home/ldm/rdhmworkflow/send_latest_output.sh");
 
@@ -61,7 +82,7 @@ sub file_monitor {
 	    }
 	    @qpefiles = ();
 	}
-	sleep 10;
+	sleep 5;
     }
     
     sub new_files  {
