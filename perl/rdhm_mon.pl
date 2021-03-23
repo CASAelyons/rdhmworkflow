@@ -22,7 +22,7 @@ our $leftover_file = "";
 our @delete_queue;
 
 &command_line_parse;
-#&daemonize;
+&daemonize;
 
 my $file_mon = new threads \&file_monitor;
 
@@ -55,14 +55,19 @@ sub file_monitor {
 
 	    #make sure we have at least two elements
 	    my $numQPEfiles = @qpefiles;
+	    
+	    my $endymd;
+	    my $endhm;
+
 	    if ($numQPEfiles < 2) {
 		#if not, use the leftover as endtime too
-		my $endymd = $startymd;
-		my $endhm = $starthm;
+		$endymd = $startymd;
+		$endhm = $starthm;
 	    }
 	    else {
-		my $endymd = substr($qpefiles[-2], -13, 8);
-		my $endhm = substr($qpefiles[-2], -5, 4);
+		#otherwise use the second to last file as the end time
+		$endymd = substr($qpefiles[-2], -13, 8);
+		$endhm = substr($qpefiles[-2], -5, 4);
 	    }
 	    my $endtime =$endymd . "T". $endhm;
 	    
