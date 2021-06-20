@@ -85,10 +85,11 @@ class rdhmWorkflow(object):
         exec_site = Site("condorpool")
         #exec_site.add_directories(shared_scratch, shared_storage)\
         exec_site.add_directories(shared_scratch)\
-                .add_pegasus_profile(clusters_size=32)\
-                .add_pegasus_profile(cores=4)\
+                .add_pegasus_profile(clusters_size=8)\
+                .add_pegasus_profile(cores=2)\
                 .add_pegasus_profile(memory=2048)\
                 .add_pegasus_profile(style="condor")\
+                .add_env(SEQEXEC_CPUS=2)\
                 .add_condor_profile(universe="vanilla")\
                 .add_pegasus_profile(auxillary_local="true")\
                 .add_profiles(Namespace.PEGASUS)\
@@ -108,7 +109,14 @@ class rdhmWorkflow(object):
             container_type=Container.SINGULARITY,
             image="file:///nfs/shared/ldm/rdhm_singularity.simg",
             image_site="condorpool",
-            bypass_staging=False,
+            mounts=["/nfs/shared:/nfs/shared", "/nfs/shared:/srv/nfs/shared"]
+        )
+        
+        rdhm_container2 = Container(
+            name="rdhm_container2",
+            container_type=Container.SINGULARITY,
+            image="file:///nfs/shared/ldm/rdhm_singularity.simg",
+            image_site="condorpool",
             mounts=["/nfs/shared:/nfs/shared"]
         )
         
@@ -116,7 +124,6 @@ class rdhmWorkflow(object):
             name="rdhm",
             site="condorpool",
             pfn="/opt/rdhm/bin/rdhm",
-            bypass_staging=False,
             container=rdhm_container
         )
 
@@ -124,15 +131,13 @@ class rdhmWorkflow(object):
             name="gunzip",
             site="condorpool",
             pfn="/bin/gunzip",
-            bypass_staging=False,
-            container=rdhm_container
+            container=rdhm_container2
         )
 
         asc_transformation = Transformation(
             name="xmrgtoasc",
             site="condorpool",
             pfn="/opt/rdhm/bin/xmrgtoasc",
-            bypass_staging=False,
             container=rdhm_container
         )
 
@@ -140,17 +145,18 @@ class rdhmWorkflow(object):
             name="xmrgtonetcdf",
             site="condorpool",
             pfn="/opt/xmrgtonetcdf/xmrgtonetcdf",
-            bypass_staging=False,
-            container=rdhm_container
+            container=rdhm_container2
         )
 
         tc = TransformationCatalog()\
-            .add_containers(rdhm_container)\
+            .add_containers(rdhm_container, rdhm_container2)\
             .add_transformations(rdhm_transformation, gz_transformation, asc_transformation, netcdf_transformation)
         
         props = Properties()
         props["pegasus.transfer.links"]="true"
         props["pegasus.transfer.bypass.input.staging"]="true"
+        props["pegasus.integrity.checking"]="none"
+        props["pegasus.mode"]="development"
         propfilepath = wfpath + 'pegasus.properties'
 
         with open(propfilepath, "w") as f:
@@ -184,31 +190,32 @@ class rdhmWorkflow(object):
             surfaceFlow_gzfile = File(surfaceFlow_gzfname)
             discharge_gzfile = File(discharge_gzfname)
             returnp_gzfile = File(returnp_gzfname)
-            rdhm_job.add_outputs(surfaceFlow_gzfile)
-            rdhm_job.add_outputs(discharge_gzfile)
-            rdhm_job.add_outputs(returnp_gzfile)
+            rdhm_job.add_outputs(surfaceFlow_gzfile, discharge_gzfile, returnp_gzfile, stage_out=False)
             
             #create names/files of unzipped files
-            surfaceFlow_fname = surfaceFlow_output_dir + "surfaceFlow" + tstamp + "z"
-            discharge_fname = discharge_output_dir + "discharge" + tstamp + "z"
-            returnp_fname = returnp_output_dir + "returnp" + tstamp + "z"
+            #surfaceFlow_fname = surfaceFlow_output_dir + "surfaceFlow" + tstamp + "z"
+            #discharge_fname = discharge_output_dir + "discharge" + tstamp + "z"
+            #returnp_fname = returnp_output_dir + "returnp" + tstamp + "z"
+            surfaceFlow_fname = "surfaceFlow" + tstamp + "z"
+            discharge_fname = "discharge" + tstamp + "z"
+            returnp_fname = "returnp" + tstamp + "z"
             surfaceFlow_file = File(surfaceFlow_fname)
             discharge_file = File(discharge_fname)
             returnp_file = File(returnp_fname)
             
             #create gunzip jobs 
             surfaceFlow_gunzip_job = Job(gz_transformation)\
-                .add_args("-k", surfaceFlow_gzfname)\
+                .add_args("-kfc", surfaceFlow_gzfname)\
                 .add_inputs(surfaceFlow_gzfile)\
-                .add_outputs(surfaceFlow_file)
+                .set_stdout(surfaceFlow_file)
             discharge_gunzip_job = Job(gz_transformation)\
-                .add_args("-k", discharge_gzfname)\
+                .add_args("-kfc", discharge_gzfname)\
                 .add_inputs(discharge_gzfile)\
-                .add_outputs(discharge_file)
+                .set_stdout(discharge_file)
             returnp_gunzip_job = Job(gz_transformation)\
-                .add_args("-k", returnp_gzfname)\
+                .add_args("-kfc", returnp_gzfname)\
                 .add_inputs(returnp_gzfile)\
-                .add_outputs(returnp_file)
+                .set_stdout(returnp_file)
 
             #add gunzip jobs to job arrays
             gzjob_arr.append(surfaceFlow_gunzip_job)
@@ -218,30 +225,34 @@ class rdhmWorkflow(object):
             #surfaceFlow_asc_fname = asc_output_dir + "surfaceFlow" + tstamp + "z.asc"
             #discharge_asc_fname = asc_output_dir + "discharge" + tstamp + "z.asc"
             #returnp_asc_fname = asc_output_dir + "returnp" + tstamp + "z.asc"
-            #surfaceFlow_asc_file = File(surfaceFlow_asc_fname)
-            #discharge_asc_file = File(discharge_asc_fname)
-            #returnp_asc_file = File(returnp_asc_fname)
+            
+            surfaceFlow_asc_fname = "surfaceFlow" + tstamp + "z.asc"
+            discharge_asc_fname = "discharge" + tstamp + "z.asc"
+            returnp_asc_fname = "returnp" + tstamp + "z.asc"
+            surfaceFlow_asc_file = File(surfaceFlow_asc_fname)
+            discharge_asc_file = File(discharge_asc_fname)
+            returnp_asc_file = File(returnp_asc_fname)
             
             #create xmrgtoasc jobs
-            #surfaceFlow_asc_job = Job(asc_transformation)\
-            #    .add_args("-i", surfaceFlow_fname, "-o", surfaceFlow_asc_fname, "-f", "\"-5.3f\"")\
-            #    .add_inputs(surfaceFlow_file)\
-            #    .add_outputs(surfaceFlow_asc_file)
+            surfaceFlow_asc_job = Job(asc_transformation)\
+                .add_args("-i", surfaceFlow_fname, "-o", surfaceFlow_asc_fname, "-f", "\"-5.3f\"")\
+                .add_inputs(surfaceFlow_file)\
+                .add_outputs(surfaceFlow_asc_file)
 
-            #discharge_asc_job = Job(asc_transformation)\
-            #    .add_args("-i", discharge_fname, "-o", discharge_asc_fname, "-f", "\"-5.3f\"")\
-            #    .add_inputs(discharge_file)\
-            #    .add_outputs(discharge_asc_file)
+            discharge_asc_job = Job(asc_transformation)\
+                .add_args("-i", discharge_fname, "-o", discharge_asc_fname, "-f", "\"-5.3f\"")\
+                .add_inputs(discharge_file)\
+                .add_outputs(discharge_asc_file)
 
-            #returnp_asc_job = Job(asc_transformation)\
-            #    .add_args("-i", returnp_fname, "-o", returnp_asc_fname, "-f", "\"-5.3f\"")\
-            #    .add_inputs(returnp_file)\
-            #    .add_outputs(returnp_asc_file)
+            returnp_asc_job = Job(asc_transformation)\
+                .add_args("-i", returnp_fname, "-o", returnp_asc_fname, "-f", "\"-5.3f\"")\
+                .add_inputs(returnp_file)\
+                .add_outputs(returnp_asc_file)
 
             #add xmrgtoasc jobs to job arrays
-            #ascjob_arr.append(surfaceFlow_asc_job)
-            #ascjob_arr.append(discharge_asc_job)
-            #ascjob_arr.append(returnp_asc_job)
+            ascjob_arr.append(surfaceFlow_asc_job)
+            ascjob_arr.append(discharge_asc_job)
+            ascjob_arr.append(returnp_asc_job)
             
             #create names/files of netcdf files
             #surfaceFlow_nc_fname = netcdf_output_dir + "surfaceFlow" + tstamp + "z.netcdf"
@@ -281,10 +292,10 @@ class rdhmWorkflow(object):
         for gzjob in gzjob_arr:
             wf.add_jobs(gzjob)
 
-        wf.add_dependency(rdhm_job, children=gzjob_arr)
+        #wf.add_dependency(rdhm_job, children=gzjob_arr)
         #xmrgtoasc
-        #for ascjob in ascjob_arr:
-        #    wf.add_jobs(ascjob)
+        for ascjob in ascjob_arr:
+            wf.add_jobs(ascjob)
 
         #xmrgtonetcdf
         #for ncjob in ncjob_arr:
@@ -298,7 +309,7 @@ class rdhmWorkflow(object):
         wf.write(wffilepath)
 
         try:
-            wf.plan(conf=propfilepath, dir=wfpath, submit=True)
+            wf.plan(conf=propfilepath, dir=wfpath, cluster=['horizontal'], submit=True)
             wf.wait()
             wf.analyze()
             wf.statistics()

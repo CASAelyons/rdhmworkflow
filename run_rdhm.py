@@ -4,7 +4,7 @@ import sys
 import os
 #import pwd
 #import time
-#import logging
+import logging
 import requests
 import json, time, socket, subprocess, pytz, certifi, urllib3
 from pathlib import Path
@@ -12,7 +12,7 @@ from Pegasus.api import *
 from datetime import datetime
 from argparse import ArgumentParser
 
-
+logging.basicConfig(level=logging.INFO)
 class rdhmWorkflow(object):
     def __init__(self, inputfile, starttime, endtime):
         #times given in ISO format like so: 20180908T1815 (no seconds)
@@ -85,6 +85,7 @@ class rdhmWorkflow(object):
         props = Properties()
         props["pegasus.transfer.links"]="true"
         props["pegasus.transfer.bypass.input.staging"]="true"
+        props["pegasus.integrity.checking"]="none"
         propfilepath = wfpath + 'pegasus.properties'
 
         with open(propfilepath, "w") as f:
